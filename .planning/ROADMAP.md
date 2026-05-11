@@ -28,11 +28,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. `npm run dev` starts a Vite dev server and renders a blank or placeholder React app in the browser
   2. The `Task` TypeScript interface and all API module functions (`getTasks`, `createTask`, `updateTask`, `deleteTask`) are implemented and covered by unit tests
   3. `npm run build` produces a clean `/dist` bundle with no TypeScript errors
-**Plans**: 2 plans
+**Plans**: 3 plans (including 1 gap closure)
 
 Plans:
 - [ ] 01-01-PLAN.md — Vite + React + TypeScript project scaffold with CSS Modules, ESLint, Prettier, Vitest
 - [ ] 01-02-PLAN.md — Data layer: Task types, UUID utility, localStorage adapter, client API module (TDD)
+- [ ] 01-GAP-PLAN.md — Gap closure: TDD data layer (Plan 01-02 was never executed; closes UAT tests 4, 5, 6)
 
 ### Phase 2: Task Capture & Display
 **Goal**: Users can capture tasks and see them in a list that persists across browser sessions — the app's core value proposition is functional
