@@ -64,6 +64,8 @@
 - [ ] The error message disappears when the user begins typing
 - [ ] No task is written to the data store on a failed submission
 
+**Test Setup:** Submit the form with the input field empty (no characters). Separately, submit with a title containing only spaces or tab characters to verify whitespace-only trimming.
+
 **Priority:** P0 | **Feature Ref:** F0
 
 ---
@@ -104,7 +106,7 @@
 
 **Acceptance Criteria:**
 - [ ] On page load, the app reads tasks from localStorage and renders them in the list
-- [ ] Tasks are displayed in insertion order (oldest at top, newest at bottom)
+- [ ] Tasks are displayed in insertion order — oldest task (lowest `createdAt`) at the top, newest at the bottom — and this order is stable across page reloads
 - [ ] Each list item shows the task title and a completion status indicator (checkbox)
 - [ ] The list is scrollable when it contains more tasks than fit in the viewport
 - [ ] The task list renders without requiring any user interaction or login
@@ -194,6 +196,8 @@
 - [ ] The stale list item is removed from the rendered list
 - [ ] If the data store write fails, a toast "Could not update task. Changes were not saved." is shown and the toggle is reverted
 
+**Test Setup (stale ID):** With a task rendered in the list, manually remove it from `localStorage` (via browser DevTools → Application → Local Storage → edit `tasktracker_tasks` to delete the entry) while the list remains on screen. Then click the completion toggle on the now-stale rendered item. **Test Setup (write failure):** Override `localStorage.setItem` to throw a `QuotaExceededError` (via browser console: `Storage.prototype.setItem = () => { throw new DOMException('QuotaExceededError'); }`) and attempt a toggle.
+
 **Priority:** P0 | **Feature Ref:** F2
 
 ---
@@ -237,6 +241,8 @@
 - [ ] If the localStorage write fails during deletion, any optimistic removal is reverted and the task reappears in the list
 - [ ] A toast notification "Could not delete task. Please try again." is displayed
 - [ ] If the task ID is already absent from the data store (stale), the item is silently removed from the list with no error message (idempotent behavior)
+
+**Test Setup (write failure):** Override `localStorage.setItem` to throw a `QuotaExceededError` (via browser console: `Storage.prototype.setItem = () => { throw new DOMException('QuotaExceededError'); }`) and attempt to delete a task. **Test Setup (stale ID):** With a task rendered in the list, manually remove it from `localStorage` via DevTools while the page stays open, then click the delete control on the stale item — expect silent removal with no toast.
 
 **Priority:** P0 | **Feature Ref:** F3
 

@@ -151,6 +151,8 @@ The following metrics define what "success" looks like for v1. Because this is a
 - **Zero data loss incidents:** No reports of tasks disappearing unexpectedly after page refresh
 - **Abandonment signal:** Track if users delete tasks without ever completing them (indicates misalignment between capture and use)
 
+> **Measurement approach for v1:** TaskTracker v1 is a fully client-side application with no backend, telemetry pipeline, or analytics integration. These metrics cannot be collected automatically in v1. They are defined here to communicate validation intent and provide a reference baseline for future instrumentation. In v1, they will be evaluated through **direct user observation methods** — structured usability sessions, manual session review with target users (Jordan and Alex persona archetypes), and explicit user feedback collection. Metrics requiring longitudinal data (retention signal, completion rate) are acknowledged as post-v1 validation targets pending the addition of lightweight telemetry or a backend.
+
 ---
 
 ## 8. Risks & Mitigations
