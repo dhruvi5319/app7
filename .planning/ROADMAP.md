@@ -20,7 +20,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Phase Details
 
 ### Phase 1: Foundation
-**Status**: executing
+**Status**: In Progress
 **Goal**: A working project scaffold with the full data layer ready — no user-facing features yet, but everything downstream phases build on
 **Depends on**: Nothing (first phase)
 **Requirements**: None (infrastructure phase — enables TASK-01 through TASK-05)
