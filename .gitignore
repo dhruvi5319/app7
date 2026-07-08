@@ -7,3 +7,12 @@ opencode.json.bak
 AGENTS.md
 .opencode.session
 # <<< pivota:opencode-ignore
+node_modules/
+dist/
+build/
+.next/
+.nuxt/
+.vite/
+.turbo/
+coverage/
+.cache/
