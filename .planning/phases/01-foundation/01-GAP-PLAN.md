@@ -62,6 +62,37 @@ must_haves:
       to: "window.localStorage"
       via: "getItem / setItem with key 'tasktracker_tasks'"
       pattern: "tasktracker_tasks"
+
+# Integration contracts — cross-wave artifact handoffs
+integration_contracts:
+  requires: []
+  provides:
+    - artifact: "src/types/task.ts"
+      exports: ["Task", "CreateTaskRequest", "UpdateTaskRequest", "ApiSuccessResponse", "ApiErrorResponse", "ErrorCode"]
+      shape: |
+        export interface Task { id: string; title: string; completed: boolean; createdAt: string; updatedAt: string }
+        export type ErrorCode = 'TITLE_REQUIRED' | 'TITLE_TOO_LONG' | 'TASK_NOT_FOUND' | 'STORAGE_READ_FAILED' | 'STORAGE_WRITE_FAILED' | 'STORAGE_CORRUPT' | 'INVALID_FIELD'
+      verify: "grep -n 'export interface Task' src/types/task.ts && grep -n 'export type ErrorCode' src/types/task.ts && echo CONTRACT_OK"
+    - artifact: "src/api/tasks.ts"
+      exports: ["getTasks", "createTask", "updateTask", "deleteTask"]
+      shape: |
+        export function getTasks(): Task[]
+        export function createTask(title: string): Task
+        export function updateTask(id: string, patch: UpdateTaskRequest): Task
+        export function deleteTask(id: string): void
+      verify: "grep -n 'export function getTasks\\|export function createTask\\|export function updateTask\\|export function deleteTask' src/api/tasks.ts | wc -l | grep -q '^4$' && echo CONTRACT_OK"
+    - artifact: "src/storage/localStorage.ts"
+      exports: ["readTasks", "writeTasks", "StorageReadError", "StorageWriteError"]
+      shape: |
+        export function readTasks(): Task[]
+        export function writeTasks(tasks: Task[]): void
+        export class StorageReadError extends Error { code: 'STORAGE_READ_FAILED' | 'STORAGE_CORRUPT' }
+        export class StorageWriteError extends Error { code: 'STORAGE_WRITE_FAILED' }
+      verify: "grep -n 'export function readTasks\\|export function writeTasks\\|export class StorageReadError\\|export class StorageWriteError' src/storage/localStorage.ts && echo CONTRACT_OK"
+    - artifact: "src/lib/uuid.ts"
+      exports: ["generateUUID"]
+      shape: "export function generateUUID(): string"
+      verify: "grep -n 'export function generateUUID' src/lib/uuid.ts && echo CONTRACT_OK"
 ---
 
 <objective>
@@ -408,6 +439,25 @@ npm run build 2>&1 | tail -5 && echo "BUILD OK"
 </task>
 
 </tasks>
+
+<threat_model>
+## Trust Boundaries
+
+| Boundary | Description |
+|----------|-------------|
+| app→localStorage | Serialized task data crossing from in-memory JS objects into browser localStorage and back |
+| caller→api | Untrusted string input (task title) crossing into the data layer API functions |
+
+## STRIDE Threat Register
+
+| Threat ID | Category | Component | Disposition | Mitigation Plan |
+|-----------|----------|-----------|-------------|-----------------|
+| T-01-GAP-01 | Tampering | `src/api/tasks.ts::validateTitle` | mitigate | Title trimmed and length-checked in `validateTitle()` before any persistence; empty/overlong titles rejected with typed ErrorCode before reaching `writeTasks` |
+| T-01-GAP-02 | Information disclosure | `src/storage/localStorage.ts::readTasks` | accept | localStorage is same-origin by default; all task data is already user-visible on screen. Residual risk accepted — no cross-origin data exposure in a pure client-side app |
+| T-01-GAP-03 | Tampering | `src/storage/localStorage.ts::readTasks` | mitigate | Corrupt JSON caught via `SyntaxError` in `readTasks()` and re-thrown as `StorageReadError` with code `STORAGE_CORRUPT`; callers cannot receive partial/malformed task arrays |
+| T-01-GAP-04 | Denial of service | `src/storage/localStorage.ts::writeTasks` | mitigate | `localStorage.setItem` wrapped in try/catch in `writeTasks()`; quota-exceeded throws are caught and re-thrown as `StorageWriteError` with code `STORAGE_WRITE_FAILED` so callers can surface a meaningful error |
+| T-01-GAP-05 | Elevation of privilege | `src/api/tasks.ts` (all functions) | accept | No authentication or authorization layer — this is a single-user client-side app with no server. All data is local to the browser user. No privilege escalation vector exists in this architecture. |
+</threat_model>
 
 <verification>
 ```bash
