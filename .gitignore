@@ -119,4 +119,13 @@ opencode.json
 opencode.json.bak
 AGENTS.md
 .opencode.session
-# <<< pivota:gitignore-managed
+# <<< pivota:opencode-ignore
+node_modules/
+dist/
+build/
+.next/
+.nuxt/
+.vite/
+.turbo/
+coverage/
+.cache/
